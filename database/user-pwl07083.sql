@@ -45,8 +45,6 @@ INSERT INTO `user` (`iduser`, `username`, `password`, `status`) VALUES
 (14, 'sacasc', '12345', 'cacad'),
 (15, 'ascsacsac', '$2y$10$Qq/IhaibdRl0dBJU95J9cOmdL', 'dad'),
 (16, 'cc', '1', '1'),
-(17, 'Daffa Naufal Athallah', 'DaffaGantenf01', 'hadir'),
-(18, 'Naufal Daffa', 'Pipiyo01', 'Izin'),
 (20, 'indraganteng', '8282828', 'Kawin');
 
 --
