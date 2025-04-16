@@ -1,124 +1,100 @@
 <?php
-require "fungsi.php";
+require "koneksi.php";
 require "head.html";
 
-$dataPerHalaman = isset($_GET['dataPerHalaman']) ? $_GET['dataPerHalaman'] : 10;
-$cari = isset($_GET['cari']) ? $_GET['cari'] : '';
-
-$sql = $cari ? "SELECT * FROM user WHERE iduser LIKE '%$cari%' OR username LIKE '%$cari%'" : "SELECT * FROM user";
-$qry = mysqli_query($koneksi, $sql);
-$jmlData = mysqli_num_rows($qry);
-$jmlHal = ceil($jmlData / $dataPerHalaman);
-$halAktif = isset($_GET['hal']) ? $_GET['hal'] : 1;
-$awalData = ($dataPerHalaman * $halAktif) - $dataPerHalaman;
-$kosong = !$jmlData;
-
-$sql .= " LIMIT $awalData, $dataPerHalaman";
-$hasil = mysqli_query($koneksi, $sql);
+$limitOptions = [5, 10, 25, 50, 100];
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- Bootstrap lokal -->
-	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="css/styleku.css">
-	<script src="bootstrap/js/bootstrap.js"></script>
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>Daftar User</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styleku.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2 class="text-center">DAFTAR USER</h2>
-        <div class="text-center mb-3">
-            <a class="btn btn-success" href="addUser.php">Tambah Data</a>
+<?php require "head.html"; ?>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">DAFTAR USER</h2>
+
+    <!-- Filter & Tambah Data -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="searchInput" class="form-control" placeholder="Cari ID user atau Username...">
         </div>
-
-        <form action="" method="get" class="d-flex mb-3">
-            <input class="form-control me-2" type="text" name="cari" placeholder="Cari user..." value="<?php echo $cari; ?>">
-            <button class="btn btn-primary me-2" type="submit">Cari</button>
-            <select name="dataPerHalaman" class="form-control" onchange="this.form.submit()">
-                <?php foreach ([5, 10, 25, 50, 100] as $size) {
-                    echo "<option value='$size'" . ($dataPerHalaman == $size ? " selected" : "") . ">$size</option>";
-                } ?>
+        <div class="col-md-3">
+            <select id="limitSelect" class="form-select">
+                <?php foreach ($limitOptions as $opt): ?>
+                    <option value="<?= $opt ?>"><?= $opt ?> per halaman</option>
+                <?php endforeach; ?>
             </select>
-        </form>
-
-        <table class="table table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID User</th>
-                    <th>Username</th>
-                    <th>Password</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($kosong) { ?>
-                    <tr><td colspan="5" class="text-center alert alert-info">Data tidak ada</td></tr>
-                <?php } else {
-                    while ($row = mysqli_fetch_assoc($hasil)) { ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($row["iduser"]); ?></td>
-                            <td><?php echo htmlspecialchars($row["username"]); ?></td>
-                            <td><?php echo htmlspecialchars($row["password"]); ?></td>
-                            <td><?php echo htmlspecialchars($row["status"]); ?></td>
-                            <td>
-                                <a class="btn btn-warning btn-sm" href="editUser.php?kode=<?php echo $row['iduser']; ?>">Edit</a>
-                                <a class="btn btn-danger btn-sm delete-btn" data-id="<?php echo $row['iduser']; ?>">Hapus</a>
-                            </td>
-                        </tr>
-                <?php } } ?>
-            </tbody>
-        </table>
-
-        <nav>
-            <ul class="pagination justify-content-center">
-                <?php if ($halAktif > 1) { ?>
-                    <li class="page-item"><a class="page-link" href="?hal=<?php echo $halAktif - 1; ?>&cari=<?php echo $cari; ?>&dataPerHalaman=<?php echo $dataPerHalaman; ?>">Previous</a></li>
-                <?php }
-                for ($i = 1; $i <= $jmlHal; $i++) { ?>
-                    <li class="page-item <?php echo ($i == $halAktif) ? 'active' : ''; ?>">
-                        <a class="page-link" href="?hal=<?php echo $i; ?>&cari=<?php echo $cari; ?>&dataPerHalaman=<?php echo $dataPerHalaman; ?>"> <?php echo $i; ?> </a>
-                    </li>
-                <?php }
-                if ($halAktif < $jmlHal) { ?>
-                    <li class="page-item"><a class="page-link" href="?hal=<?php echo $halAktif + 1; ?>&cari=<?php echo $cari; ?>&dataPerHalaman=<?php echo $dataPerHalaman; ?>">Next</a></li>
-                <?php } ?>
-            </ul>
-        </nav>
+        </div>
+        <div class="col-md-3">
+            <a href="addUser.php" class="btn btn-success w-100">Tambah Data</a>
+        </div>
     </div>
 
-    <script>
-        $(document).ready(function() {
-        $('.delete-btn').on('click', function(e) {
-        e.preventDefault();
-        var userId = $(this).data('id'); // Mengambil ID user dari atribut data-id
-        var row = $(this).closest('tr'); // Mendapatkan baris tabel terkait
+    <!-- Kontainer tabel & pagination -->
+    <div id="userTableContainer">
+        <!-- Data akan dimuat melalui AJAX -->
+    </div>
+</div>
 
-        // Menampilkan konfirmasi penghapusan
-        if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-            $.ajax({
-                url: 'hpsUser.php', // File PHP untuk menghapus user
-                type: 'POST',
-                data: { iduser: userId },
-                dataType: 'json', // Format data yang diharapkan dari server
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Data berhasil dihapus!');
-                        row.fadeOut(500, function() { $(this).remove(); }); // Menghapus baris dengan animasi
-                    } else {
-                        alert('Gagal menghapus data: ' + response.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Terjadi kesalahan: ' + error);
+<script>
+function loadUserData(keyword = '', limit = 5, page = 1) {
+    $.get('search_UpdateUser_Ajax.php', {
+        keyword: keyword,
+        limit: limit,
+        page: page
+    }, function(data) {
+        $('#userTableContainer').html(data);
+    });
+}
+
+$(document).ready(function() {
+    let keyword = '';
+    let limit = $('#limitSelect').val();
+    let currentPage = 1;
+
+    loadUserData(keyword, limit, currentPage);
+
+    $('#searchInput, #limitSelect').on('input change', function() {
+        keyword = $('#searchInput').val();
+        limit = $('#limitSelect').val();
+        currentPage = 1;
+        loadUserData(keyword, limit, currentPage);
+    });
+
+    $(document).on('click', '.page-link', function(e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        if (page) {
+            keyword = $('#searchInput').val();
+            limit = $('#limitSelect').val();
+            loadUserData(keyword, limit, page);
+        }
+    });
+
+    // Hapus data
+    $(document).on('click', '.delete-btn', function(e) {
+        e.preventDefault();
+        let userId = $(this).data('id');
+        let row = $(this).closest('tr');
+        if (confirm('Yakin ingin menghapus user ini?')) {
+            $.post('hpsUser.php', { iduser: userId }, function(response) {
+                if (response.status === 'success') {
+                    row.fadeOut(300, function() { $(this).remove(); });
+                } else {
+                    alert('Gagal menghapus data: ' + response.message);
                 }
-            });
+            }, 'json');
         }
     });
 });
-    </script>
+</script>
 </body>
 </html>

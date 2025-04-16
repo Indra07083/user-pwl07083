@@ -10,7 +10,7 @@
 </head>
 <body>
 	<?php
-	require "fungsi.php";
+	require "koneksi.php";
 	require "head.html";
 
 	$id = isset($_GET['kode']) ? $_GET['kode'] : '';
