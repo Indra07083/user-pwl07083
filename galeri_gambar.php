@@ -18,7 +18,7 @@ $result = $conn->query("SELECT * FROM galeri_gambar ORDER BY uploaded_at DESC LI
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GALERI GAMBAR</title>
+    <title>Galeri Gambar</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
@@ -41,6 +41,7 @@ $result = $conn->query("SELECT * FROM galeri_gambar ORDER BY uploaded_at DESC LI
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">GALERI GAMBAR</h2>
+
     <!-- Upload Form -->
     <div class="upload-section mb-4 p-4 bg-light rounded">
         <form id="uploadForm" method="post" enctype="multipart/form-data">
@@ -54,13 +55,6 @@ $result = $conn->query("SELECT * FROM galeri_gambar ORDER BY uploaded_at DESC LI
             <div id="uploadMessage" class="mt-3"></div>
         </form>
     </div>
-
-    <?php
-    $result = $conn->query("SELECT * FROM gambar_thumbnail ORDER BY id DESC");
-    while ($row = $result->fetch_assoc()) {
-        echo "<img src='" . $row['thumbpath'] . "' width='150' style='margin:10px;'><br>";
-    }
-    ?>
 
     <!-- Filter & Search -->
     <div class="row mb-3">
@@ -87,8 +81,8 @@ $result = $conn->query("SELECT * FROM galeri_gambar ORDER BY uploaded_at DESC LI
                         </a>
                         <div class="card-body">
                             <p class="card-text small text-truncate"><?= htmlspecialchars($row['filename']) ?></p>
-                            <a href="editGambar.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="hpsGambar.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus gambar ini?')">Hapus</a>
+                            <a href="editGambar.php?id=<?= $row['Id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="hpsGambar.php?id=<?= $row['Id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus gambar ini?')">Hapus</a>
                         </div>
                     </div>
                 </div>
@@ -100,6 +94,7 @@ $result = $conn->query("SELECT * FROM galeri_gambar ORDER BY uploaded_at DESC LI
         <?php endif; ?>
     </div>
 
+    <!-- Pagination -->
     <nav>
         <ul class="pagination justify-content-center">
             <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
@@ -135,10 +130,11 @@ $(document).ready(function() {
         e.preventDefault();
         let formData = new FormData(this);
         $('#uploadMessage').removeClass().text('');
+
         $.ajax({
             url: 'sv_galeriGambar.php',
             type: 'POST',
-            data: 'formData',
+            data: formData,
             contentType: false,
             processData: false,
             dataType: 'json',

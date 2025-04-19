@@ -8,7 +8,7 @@ $limitOptions = [5, 10, 25, 50, 100];
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Daftar User</title>
+    <title>DAFTAR USER</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styleku.css">

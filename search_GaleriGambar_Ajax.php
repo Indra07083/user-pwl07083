@@ -16,8 +16,8 @@ if ($result->num_rows > 0) {
         echo '</a>';
         echo '<div class="card-body">';
         echo '<p class="card-text small text-truncate">' . htmlspecialchars($row['filename']) . '</p>';
-        echo '<a href="editGambar.php?id=' . $row['id'] . '" class="btn btn-sm btn-warning">Edit</a> ';
-        echo '<a href="hpsGambar.php?id=' . $row['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Yakin ingin menghapus gambar ini?\')">Hapus</a>';
+        echo '<a href="editGambar.php?id=' . $row['Id'] . '" class="btn btn-sm btn-warning">Edit</a> ';
+        echo '<a href="hpsGambar.php?id=' . $row['Id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Yakin ingin menghapus gambar ini?\')">Hapus</a>';
         echo '</div></div></div>';
     }
 } else {
